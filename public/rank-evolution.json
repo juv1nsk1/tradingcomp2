@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp": "2026-03-26T15:17:05.925Z",
+    "top": [
+      {
+        "rank": 1,
+        "wallet": "0xb6ac0341fcf3fb507a8208d34a97f13779e1393d",
+        "balance": "900000000"
+      },
+      {
+        "rank": 2,
+        "wallet": "0x240229677a21af366471ecef351d453718fc953f",
+        "balance": "100000000"
+      },
+      {
+        "rank": 3,
+        "wallet": "0x0ed28ba918cec1f2632ccae2d4649ee64066f936",
+        "balance": "0"
+      },
+      {
+        "rank": 4,
+        "wallet": "0x1bf729a36085c9c65410a961d21df8c19b710af0",
+        "balance": "0"
+      },
+      {
+        "rank": 5,
+        "wallet": "0x2129cfab1198e2db780049736eea8a16f37d67e8",
+        "balance": "0"
+      }
+    ]
+  }
+]
