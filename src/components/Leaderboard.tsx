@@ -14,12 +14,12 @@ import { factTradeUrl } from '../utils/factTradeApi';
 
 const STANDINGS_URL =
   typeof import.meta.env.VITE_LEADERBOARD_STANDINGS_URL === 'string' &&
-  import.meta.env.VITE_LEADERBOARD_STANDINGS_URL.trim() !== ''
+    import.meta.env.VITE_LEADERBOARD_STANDINGS_URL.trim() !== ''
     ? import.meta.env.VITE_LEADERBOARD_STANDINGS_URL.trim()
     : factTradeUrl('standings');
 const EVOLUTION_URL =
   typeof import.meta.env.VITE_LEADERBOARD_RANK_URL === 'string' &&
-  import.meta.env.VITE_LEADERBOARD_RANK_URL.trim() !== ''
+    import.meta.env.VITE_LEADERBOARD_RANK_URL.trim() !== ''
     ? import.meta.env.VITE_LEADERBOARD_RANK_URL.trim()
     : factTradeUrl('rank');
 
@@ -215,9 +215,9 @@ export function Leaderboard() {
                 <th className="px-1 py-2.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Wallet</th>
                 <th
                   className="px-1 py-2.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wide text-right"
-                  title="Portfolio value (FT564)"
+                  title="Portfolio value (fs564)"
                 >
-                  FT564
+                  fs564
                 </th>
                 <th className="pl-1 pr-3 py-2.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wide text-right">
                   Δ last
@@ -281,9 +281,8 @@ export function Leaderboard() {
                       </td>
                       <td className="pl-1 pr-3 py-2.5 whitespace-nowrap text-right">
                         <span
-                          className={`inline-flex items-center gap-0.5 text-xs font-medium tabular-nums ${
-                            Number(row.change24h) >= 0 ? 'text-emerald-600' : 'text-red-600'
-                          }`}
+                          className={`inline-flex items-center gap-0.5 text-xs font-medium tabular-nums ${Number(row.change24h) >= 0 ? 'text-emerald-600' : 'text-red-600'
+                            }`}
                         >
                           {Number(row.change24h) >= 0 ? (
                             <TrendingUp size={12} className="shrink-0" />

@@ -20,7 +20,7 @@ export const TOKENS = {
   },
   FT564: {
     address: envAddress(import.meta.env.VITE_TOKEN_FT564_ADDRESS, 'VITE_TOKEN_FT564_ADDRESS'),
-    symbol: 'FT564',
+    symbol: 'fs564',
     decimals: 18,
   },
 };

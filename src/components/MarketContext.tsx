@@ -103,7 +103,7 @@ export function MarketContext() {
               </p>
             </div>
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">FT564 Balance</p>
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">fs564 Balance</p>
               <p className="text-2xl font-bold text-gray-900 font-mono">
                 {formatCompactBalance(ft564Balance)}
               </p>
@@ -120,7 +120,7 @@ export function MarketContext() {
           </h2>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-              fETH / FT564
+              fETH / fs564
             </span>
             <button
               type="button"
