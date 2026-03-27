@@ -11,7 +11,8 @@
     "lint": "tsc --noEmit",
     "seed-pool-ticks": "tsx scripts/seed-v3-pool-ticks.ts",
     "fetch-pool-price": "tsx scripts/fetch-pool-price.ts",
-    "fetch-holder-balances": "tsx scripts/fetch-holder-balances.ts"
+    "fetch-holder-balances": "tsx scripts/fetch-holder-balances.ts",
+    "fetch-holder-ens": "tsx scripts/fetch-holder-ens.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

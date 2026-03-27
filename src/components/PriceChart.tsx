@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createChart, ColorType, IChartApi, LineSeries, type Time } from 'lightweight-charts';
 import type { PoolPriceSnapshot } from '../types/poolPrice';
-import { formatUnixSecondsNY } from '../utils/chartTimezone';
+import { formatUnixSeconds } from '../utils/chartTimezone';
 
 type Timeframe = '1H' | '24H' | '1W';
 
@@ -63,11 +63,11 @@ export function PriceChart({ snapshots, loading, error }: PriceChartProps) {
       height: 300,
       localization: {
         timeFormatter: (time: Time) => {
-          if (typeof time === 'number') return formatUnixSecondsNY(time);
+          if (typeof time === 'number') return formatUnixSeconds(time);
           if (time && typeof time === 'object' && 'year' in time) {
             const bd = time as { year: number; month: number; day: number };
             const utc = Date.UTC(bd.year, bd.month - 1, bd.day, 12, 0, 0);
-            return formatUnixSecondsNY(Math.floor(utc / 1000));
+            return formatUnixSeconds(Math.floor(utc / 1000));
           }
           return '';
         },
@@ -132,7 +132,6 @@ export function PriceChart({ snapshots, loading, error }: PriceChartProps) {
           <code className="text-xs bg-gray-100 px-1 rounded">npm run fetch-pool-price</code>.
         </p>
       )}
-      <p className="text-[11px] text-gray-400 mb-1">Axis times: New York (America/New_York)</p>
       <div ref={chartContainerRef} className="flex-1 w-full min-h-[300px]" />
     </div>
   );

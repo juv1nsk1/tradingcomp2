@@ -15,6 +15,7 @@
  *   HOLDERS_EVOLUTION_CSV — optional append-only CSV (data/) for chart: timestamp, wallet, balance (top 5)
  *   HOLDERS_PUBLIC_STANDINGS_JSON — optional, default public/leaderboard-standings.json (Competition Standings)
  *   HOLDERS_PUBLIC_EVOLUTION_JSON — optional, default public/rank-evolution.json (append snapshots for chart)
+ *   HOLDERS_ENS_CSV — optional, default data/holder-ens.csv (address, ens); merged into standings & rank-evolution JSON
  *   HOLDERS_ETHERSCAN_DELAY_MS — optional ms to wait between API calls (default 450; Etherscan free tier ≈ 3/sec)
  */
 
@@ -114,6 +115,45 @@ function parseHoldersFile(content: string): `0x${string}`[] {
     wallets.push(w as `0x${string}`);
   }
   return wallets;
+}
+
+/**
+ * Loads `data/holder-ens.csv` (from `npm run fetch-holder-ens`): address, ens.
+ * Keys are lowercase hex addresses; values may be empty when no primary name.
+ */
+function loadHolderEnsMap(ensPath: string): Map<string, string> {
+  const map = new Map<string, string>();
+  if (!fs.existsSync(ensPath)) {
+    console.warn(
+      `ENS map not found (${ensPath}). Run \`npm run fetch-holder-ens\` first; JSON rows will have empty ens.`,
+    );
+    return map;
+  }
+
+  const lines = fs.readFileSync(ensPath, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const comma = trimmed.indexOf(',');
+    if (comma === -1) continue;
+    const addr = trimmed.slice(0, comma).trim();
+    let ens = trimmed.slice(comma + 1).trim();
+    if (addr.toLowerCase() === 'address') continue;
+    if (ens.startsWith('"') && ens.endsWith('"')) {
+      ens = ens.slice(1, -1).replace(/""/g, '"');
+    }
+    if (!isAddress(addr)) continue;
+    map.set(addr.toLowerCase(), ens);
+  }
+
+  if (map.size > 0) {
+    console.log(`Loaded ${map.size} ENS row(s) from ${ensPath}`);
+  }
+  return map;
+}
+
+function ensForWallet(ensByWallet: Map<string, string>, wallet: `0x${string}`): string {
+  return ensByWallet.get(wallet.toLowerCase()) ?? '';
 }
 
 /**
@@ -264,10 +304,12 @@ async function main() {
     process.env.HOLDERS_EVOLUTION_CSV?.trim() || path.join(ROOT, 'data', 'rank-evolution.csv');
   const publicStandingsPath =
     process.env.HOLDERS_PUBLIC_STANDINGS_JSON?.trim() ||
-    path.join(ROOT, 'public', 'leaderboard-standings.json');
+    path.join('/srv/fact/site/data/trade', 'leaderboard-standings.json');
   const publicEvolutionPath =
     process.env.HOLDERS_PUBLIC_EVOLUTION_JSON?.trim() ||
-    path.join(ROOT, 'public', 'rank-evolution.json');
+    path.join('/srv/fact/site/data/trade', 'rank-evolution.json');
+  const ensPath =
+    process.env.HOLDERS_ENS_CSV?.trim() || path.join(ROOT, 'data', 'holder-ens.csv');
 
   if (!fs.existsSync(inPath)) {
     throw new Error(`Input file not found: ${inPath}`);
@@ -291,6 +333,7 @@ async function main() {
   }
 
   const previousPortfolioByWallet = loadPreviousPortfolioByWallet(publicStandingsPath);
+  const ensByWallet = loadHolderEnsMap(ensPath);
 
   const rows: string[] = ['position, previous position, wallet, balance'];
   const snapshots: HolderSnapshot[] = [];
@@ -330,11 +373,13 @@ async function main() {
   const standingsRows: LeaderboardStandingsRow[] = sorted.map((h, idx) => {
     const rank = idx + 1;
     const prevBal = previousPortfolioByWallet.get(h.wallet.toLowerCase());
+    const ens = ensForWallet(ensByWallet, h.wallet);
     return {
       rank,
       wallet: h.wallet,
       portfolioValue: h.balanceHuman,
       change24h: changeVsPrevious(prevBal, h.balanceHuman),
+      ens,
     };
   });
 
@@ -351,6 +396,7 @@ async function main() {
       rank: i + 1,
       wallet: h.wallet,
       balance: h.balanceHuman,
+      ens: ensForWallet(ensByWallet, h.wallet),
     })),
   };
   appendRankEvolutionJson(publicEvolutionPath, evolutionSnapshot);

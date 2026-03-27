@@ -5,27 +5,32 @@
       {
         "rank": 1,
         "wallet": "0xb6ac0341fcf3fb507a8208d34a97f13779e1393d",
-        "balance": "900000000"
+        "balance": "900000000",
+        "ens": "icedcool.eth"
       },
       {
         "rank": 2,
         "wallet": "0x240229677a21af366471ecef351d453718fc953f",
-        "balance": "100000000"
+        "balance": "100000000",
+        "ens": "juvinski.eth"
       },
       {
         "rank": 3,
         "wallet": "0x0ed28ba918cec1f2632ccae2d4649ee64066f936",
-        "balance": "0"
+        "balance": "0",
+        "ens": "xuanru.eth"
       },
       {
         "rank": 4,
         "wallet": "0x1bf729a36085c9c65410a961d21df8c19b710af0",
-        "balance": "0"
+        "balance": "0",
+        "ens": "wenhaoliu.eth"
       },
       {
         "rank": 5,
         "wallet": "0x2129cfab1198e2db780049736eea8a16f37d67e8",
-        "balance": "0"
+        "balance": "0",
+        "ens": "zihuan2026.eth"
       }
     ]
   }

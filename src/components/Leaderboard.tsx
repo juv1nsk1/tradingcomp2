@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
-import { Trophy, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Trophy, TrendingUp, TrendingDown, RefreshCw, Copy } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import {
   isLeaderboardStandingsFile,
@@ -9,7 +10,7 @@ import {
   type RankEvolutionSnapshot,
 } from '../types/leaderboard';
 import { formatCompactFromDecimalString } from '../utils/formatCompactNumber';
-import { formatChartAxisDateNY, formatChartTooltipNY } from '../utils/chartTimezone';
+import { formatChartAxisDate, formatChartTooltip } from '../utils/chartTimezone';
 import { factTradeUrl } from '../utils/factTradeApi';
 
 const STANDINGS_URL =
@@ -28,6 +29,15 @@ const LINE_COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#6366f1'];
 function shortWallet(w: string) {
   if (w.length <= 14) return w;
   return `${w.slice(0, 6)}…${w.slice(-4)}`;
+}
+
+async function copyWalletAddress(wallet: `0x${string}`) {
+  try {
+    await navigator.clipboard.writeText(wallet);
+    toast.success('Address copied', { duration: 2000 });
+  } catch {
+    toast.error('Could not copy address');
+  }
 }
 
 /** Pivot evolution snapshots → Recharts rows (rank on Y by wallet key). */
@@ -49,7 +59,7 @@ function evolutionToChartData(snapshots: RankEvolutionSnapshot[]) {
   const chartRows = sorted.map((s) => {
     const rankByWallet = new Map(s.top.map((e) => [e.wallet.toLowerCase(), e.rank]));
     const row: Record<string, unknown> = {
-      date: formatChartAxisDateNY(s.timestamp),
+      date: formatChartAxisDate(s.timestamp),
       dateFull: s.timestamp,
     };
     for (const w of walletKeys) {
@@ -59,6 +69,31 @@ function evolutionToChartData(snapshots: RankEvolutionSnapshot[]) {
   });
 
   return { chartRows, walletKeys };
+}
+
+/** Lowercase wallet → ENS from evolution snapshots (newer snapshots win), then standings for gaps. */
+function buildWalletEnsMap(
+  snapshots: RankEvolutionSnapshot[],
+  standingsRows: LeaderboardStandingsRow[],
+): Map<string, string> {
+  const map = new Map<string, string>();
+  const sorted = [...snapshots].sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+  );
+  for (const s of sorted) {
+    for (const e of s.top) {
+      const ens = e.ens?.trim();
+      if (ens) map.set(e.wallet.toLowerCase(), ens);
+    }
+  }
+  for (const r of standingsRows) {
+    const ens = r.ens?.trim();
+    if (ens) {
+      const k = r.wallet.toLowerCase();
+      if (!map.has(k)) map.set(k, ens);
+    }
+  }
+  return map;
 }
 
 export function Leaderboard() {
@@ -100,6 +135,11 @@ export function Leaderboard() {
 
   const { chartRows, walletKeys } = useMemo(() => evolutionToChartData(evolution), [evolution]);
 
+  const walletEnsByKey = useMemo(
+    () => buildWalletEnsMap(evolution, standings),
+    [evolution, standings],
+  );
+
   const maxRank = useMemo(() => {
     let m = 5;
     for (const row of chartRows) {
@@ -118,7 +158,6 @@ export function Leaderboard() {
           <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <TrendingUp size={20} className="text-indigo-600" />
             Rank Evolution (Top {Math.min(5, walletKeys.length) || 5})
-            <span className="text-xs font-normal text-gray-400 ml-1">(New York)</span>
           </h2>
           <button
             type="button"
@@ -163,10 +202,14 @@ export function Leaderboard() {
                 labelFormatter={(_, p) => {
                   const pl = p?.[0]?.payload as { dateFull?: string } | undefined;
                   const iso = pl?.dateFull;
-                  return iso ? formatChartTooltipNY(iso) : '';
+                  return iso ? formatChartTooltip(iso) : '';
                 }}
                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                formatter={(value: number | string, name: string) => [value, shortWallet(name)]}
+                formatter={(value: number | string, name: string) => {
+                  const ens = walletEnsByKey.get(name.toLowerCase());
+                  const label = ens && ens.length > 0 ? ens : shortWallet(name);
+                  return [value, label];
+                }}
               />
               {walletKeys.map((w, i) => (
                 <Line
@@ -257,21 +300,44 @@ export function Leaderboard() {
                           {row.rank === 1 && <Trophy size={12} className="text-amber-500 shrink-0" />}
                         </div>
                       </td>
-                      <td className="px-1 py-2.5 min-w-0 font-mono text-xs text-gray-600">
-                        {isYou ? (
-                          <span className="font-semibold text-indigo-600 inline-flex items-center gap-1 min-w-0 max-w-full">
-                            <span className="truncate">
-                              {address ? `${address.slice(0, 6)}…${address.slice(-4)}` : row.wallet}
-                            </span>
-                            <span className="bg-indigo-100 text-indigo-700 text-[9px] px-1 py-0.5 rounded shrink-0">
-                              You
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="block truncate" title={row.wallet}>
-                            {shortWallet(row.wallet)}
-                          </span>
-                        )}
+                      <td className="px-1 py-2.5 min-w-0 text-xs text-gray-600">
+                        {(() => {
+                          const ens = row.ens?.trim();
+                          const hasEns = Boolean(ens && ens.length > 0);
+                          const display = hasEns
+                            ? ens!
+                            : isYou && address
+                              ? shortWallet(address)
+                              : shortWallet(row.wallet);
+                          const title = hasEns ? `${ens} · ${row.wallet}` : row.wallet;
+                          return (
+                            <div className="flex items-center gap-1 min-w-0 max-w-full">
+                              <span
+                                className={`truncate min-w-0 ${hasEns ? 'font-medium text-gray-800' : 'font-mono'} ${isYou ? 'font-semibold text-indigo-600' : ''}`}
+                                title={title}
+                              >
+                                {display}
+                              </span>
+                              {isYou && (
+                                <span className="bg-indigo-100 text-indigo-700 text-[9px] px-1 py-0.5 rounded shrink-0">
+                                  You
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                className="shrink-0 p-0.5 rounded text-gray-400 hover:text-indigo-600 hover:bg-gray-100 transition-colors"
+                                aria-label="Copy wallet address"
+                                title="Copy wallet address"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  void copyWalletAddress(row.wallet);
+                                }}
+                              >
+                                <Copy size={14} strokeWidth={2} />
+                              </button>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td
                         className="px-1 py-2.5 whitespace-nowrap text-right text-xs font-medium text-gray-900 tabular-nums"
