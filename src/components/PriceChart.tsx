@@ -85,6 +85,11 @@ export function PriceChart({ snapshots, loading, error }: PriceChartProps) {
       crosshairMarkerRadius: 4,
       crosshairMarkerBorderColor: '#ffffff',
       crosshairMarkerBackgroundColor: '#4f46e5',
+      priceFormat: {
+        type: 'price',
+        precision: 3,
+        minMove: 0.001,
+      },
     });
 
     lineSeries.setData(lineData as { time: any; value: number }[]);
@@ -126,8 +131,8 @@ export function PriceChart({ snapshots, loading, error }: PriceChartProps) {
       )}
       {!loading && !error && lineData.length === 0 && (
         <p className="text-sm text-gray-500 mb-2">
-          No price data in this range. Data is loaded via <code className="text-xs bg-gray-100 px-1 rounded">/api/fact/trade/poolPrice</code>{' '}
-          (proxied to Fact Finance). Try another timeframe or set{' '}
+          No price data in this range. Data is loaded via <code className="text-xs bg-gray-100 px-1 rounded">poolPrice</code>{' '}
+         Try another timeframe or set{' '}
           <code className="text-xs bg-gray-100 px-1 rounded">VITE_POOL_PRICE_URL=/pool-price.json</code> and run{' '}
           <code className="text-xs bg-gray-100 px-1 rounded">npm run fetch-pool-price</code>.
         </p>

@@ -1,7 +1,7 @@
 /** One pool price snapshot (Fact Finance API or `public/pool-price.json` from `npm run fetch-pool-price`). */
 export type PoolPriceSnapshot = {
   timestamp: string;
-  /** FT564 per 1 fETH */
+  /** fETH per 1 FT564 (fs564) */
   price: number;
   pair: `0x${string}`;
 };

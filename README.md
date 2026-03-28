@@ -8,7 +8,7 @@
 
 ### Log pool price to CSV
 
-`npm run fetch-pool-price` reads the **Uniswap V2 pair** reserves (`getReserves`) and **appends** to **`public/pool-price.json`**: `{ "timestamp", "price", "pair" }`. **Price** = **FT564 per 1 fETH** (spot mid-price from reserves). The helper **`appendPoolPriceJson`** is exported from `scripts/fetch-pool-price.ts` for reuse.
+`npm run fetch-pool-price` reads the **Uniswap V2 pair** reserves (`getReserves`) and **appends** to **`public/pool-price.json`**: `{ "timestamp", "price", "pair" }`. **Price** = **fETH per 1 FT564** (spot mid-price from reserves). The helper **`appendPoolPriceJson`** is exported from `scripts/fetch-pool-price.ts` for reuse.
 
 **Market Context** and **Leaderboard** load from the Fact Finance trade API via same-origin **`/api/fact/trade/*`**:
 

@@ -1,7 +1,7 @@
 /**
  * Reads Uniswap V2 pair reserves and appends a spot price snapshot to a JSON file.
  *
- * Price = FT564 per 1 fETH (mid price from reserves, no fee adjustment).
+ * Price = fETH per 1 FT564 (fs564) — mid price from reserves, no fee adjustment.
  *
  * Output: JSON array of `{ timestamp, price, pair }` (appended each run).
  *
@@ -44,8 +44,8 @@ function requireAddr(value: string | undefined, name: string): `0x${string}` {
   return value as `0x${string}`;
 }
 
-/** FT564 human units per 1 fETH (spot from reserves). */
-function ft564PerFeth(
+/** fETH human units per 1 FT564 (spot from reserves). */
+function fethPerFt564(
   feth: `0x${string}`,
   reserve0: bigint,
   reserve1: bigint,
@@ -62,10 +62,10 @@ function ft564PerFeth(
   if (r0 <= 0 || r1 <= 0) throw new Error('Pool reserves are zero or invalid.');
 
   if (f === t0) {
-    return r1 / r0;
+    return r0 / r1;
   }
   if (f === t1) {
-    return r0 / r1;
+    return r1 / r0;
   }
   throw new Error('fETH address does not match pair token0/token1.');
 }
@@ -165,7 +165,7 @@ async function main() {
   );
 
   const [reserve0, reserve1] = reserves;
-  const price = ft564PerFeth(feth, reserve0, reserve1, token0, token1, dec0, dec1);
+  const price = fethPerFt564(feth, reserve0, reserve1, token0, token1, dec0, dec1);
 
   const entry: PoolPriceSnapshot = {
     timestamp: new Date().toISOString(),
@@ -177,7 +177,7 @@ async function main() {
 
   console.log(`Appended snapshot: ${JSON.stringify(entry)}`);
   console.log(`File: ${outPath} (${list.length} total snapshot(s))`);
-  console.log(`(FT564 per 1 fETH; pair ${pair})`);
+  console.log(`(fETH per 1 FT564; pair ${pair})`);
 }
 
 main().catch((e) => {

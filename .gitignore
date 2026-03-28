@@ -9,5 +9,4 @@ data/rank-evolution.csv
 .env*
 !.env
 !.env.example
-.env2
 .env
