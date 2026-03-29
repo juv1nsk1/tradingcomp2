@@ -9,7 +9,7 @@ import {
   type LeaderboardStandingsRow,
   type RankEvolutionSnapshot,
 } from '../types/leaderboard';
-import { formatCompactFromDecimalString } from '../utils/formatCompactNumber';
+import { formatStandingsPortfolioValue } from '../utils/formatCompactNumber';
 import { formatChartAxisDate, formatChartTooltip } from '../utils/chartTimezone';
 import { factTradeUrl } from '../utils/factTradeApi';
 
@@ -343,7 +343,7 @@ export function Leaderboard() {
                         className="px-1 py-2.5 whitespace-nowrap text-right text-xs font-medium text-gray-900 tabular-nums"
                         title={row.portfolioValue}
                       >
-                        {formatCompactFromDecimalString(row.portfolioValue)}
+                        {formatStandingsPortfolioValue(row.portfolioValue)}
                       </td>
                       <td className="pl-1 pr-3 py-2.5 whitespace-nowrap text-right">
                         <span

@@ -12,3 +12,13 @@ export function formatCompactFromDecimalString(s: string): string {
   const n = Number.parseFloat(s);
   return formatCompactBalance(n);
 }
+
+/** Competition standings portfolio column: no k/M/B; thousands separators + exactly 3 decimal places. */
+export function formatStandingsPortfolioValue(s: string): string {
+  const n = Number.parseFloat(s);
+  if (!Number.isFinite(n)) return '0.000';
+  return n.toLocaleString('en-US', {
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
+  });
+}
