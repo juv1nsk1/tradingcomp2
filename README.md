@@ -3,7 +3,7 @@
 **Prerequisites:** Node.js
 
 1. Install dependencies: `npm install`
-2. **Token & pair addresses** — the app reads `VITE_TOKEN_FETH_ADDRESS`, `VITE_TOKEN_FT564_ADDRESS`, and `VITE_PAIR_V2_ADDRESS` (see [`.env.example`](.env.example)). **Defaults are in the committed [`.env`](.env)** so `npm run dev` and `npm run build` work without extra setup. To override locally, use **`.env.local`** (gitignored) or edit `.env` if you’re not worried about committing changes.
+2. **Token, pair & router** — `VITE_TOKEN_FETH_ADDRESS`, `VITE_TOKEN_FT564_ADDRESS`, `VITE_PAIR_V2_ADDRESS`, and **`VITE_UNISWAP_V2_ROUTER_ADDRESS`** (Uniswap V2 Router02). The default router in [`.env`](.env) is the **official Sepolia Router02**; your `VITE_PAIR_V2_ADDRESS` must be a pair created by the **same factory** that router uses (official Sepolia factory), or set a router you deployed for your own factory. Swaps use **`swapExactTokensForTokens`** on the router (one tx: pull tokens + swap). See [`.env.example`](.env.example). Override locally with **`.env.local`**.
 3. Run the app: `npm run dev`
 
 ### Log pool price to CSV

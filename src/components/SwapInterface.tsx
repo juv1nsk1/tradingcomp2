@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from 'wagmi';
 import { parseUnits, formatUnits, maxUint256, parseAbi, decodeErrorResult } from 'viem';
-import { TOKENS, CONTRACTS, ERC20_ABI, PAIR_V2_ABI } from '../utils/contracts';
+import { TOKENS, CONTRACTS, ERC20_ABI, PAIR_V2_ABI, ROUTER_V2_ABI } from '../utils/contracts';
 import { Settings, ArrowDownUp, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRecentTransactions } from '../context/RecentTransactionsContext';
@@ -118,7 +118,7 @@ export function SwapInterface() {
     address: tokenIn.address,
     abi: ERC20_ABI,
     functionName: 'allowance',
-    args: [address as `0x${string}`, CONTRACTS.PAIR_V2],
+    args: [address as `0x${string}`, CONTRACTS.ROUTER_V2],
     query: { enabled: !!address },
   });
   const { data: pairToken0 } = useReadContract({
@@ -166,7 +166,7 @@ export function SwapInterface() {
 
   useEffect(() => {
     if (!approveHash) return;
-    addTransaction(`Approve ${approveSymbolRef.current || 'token'} for V2 pair`, approveHash);
+    addTransaction(`Approve ${approveSymbolRef.current || 'token'} for V2 router`, approveHash);
     toast.loading(
       <span>
         Approval submitted.{' '}
@@ -201,7 +201,7 @@ export function SwapInterface() {
       address: tokenIn.address,
       abi: ERC20_ABI,
       functionName: 'approve',
-      args: [CONTRACTS.PAIR_V2, maxUint256],
+      args: [CONTRACTS.ROUTER_V2, maxUint256],
     } as any);
   };
 
@@ -216,7 +216,6 @@ export function SwapInterface() {
       const reserve1 = (reservesData as readonly [bigint, bigint, number])[1];
       const inIsToken0 = tokenIn.address.toLowerCase() === String(pairToken0).toLowerCase();
       const inIsToken1 = tokenIn.address.toLowerCase() === String(pairToken1).toLowerCase();
-      const outIsToken0 = tokenOut.address.toLowerCase() === String(pairToken0).toLowerCase();
 
       if (!inIsToken0 && !inIsToken1) {
         throw new Error('Selected token pair does not match the configured UniswapV2 pair.');
@@ -229,25 +228,21 @@ export function SwapInterface() {
 
       const slipBps = BigInt(Math.max(0, Math.min(10_000, Math.round(slippage * 100))));
       const amountOutMinimum = (quotedOut * (10_000n - slipBps)) / 10_000n;
-      const amount0Out = outIsToken0 ? amountOutMinimum : 0n;
-      const amount1Out = outIsToken0 ? 0n : amountOutMinimum;
 
-      const transferHash = await writeSwapAsync({
-        address: tokenIn.address,
-        abi: ERC20_ABI,
-        functionName: 'transfer',
-        args: [CONTRACTS.PAIR_V2, parsedAmountIn],
-      } as any);
-      addTransaction(`Send ${amountIn} ${tokenIn.symbol} to V2 pair`, transferHash);
-      await publicClient.waitForTransactionReceipt({ hash: transferHash });
-
+      const deadline = BigInt(Math.floor(Date.now() / 1000) + 20 * 60);
       const swapHash = await writeSwapAsync({
-        address: CONTRACTS.PAIR_V2,
-        abi: PAIR_V2_ABI,
-        functionName: 'swap',
-        args: [amount0Out, amount1Out, address, '0x'],
+        address: CONTRACTS.ROUTER_V2,
+        abi: ROUTER_V2_ABI,
+        functionName: 'swapExactTokensForTokens',
+        args: [
+          parsedAmountIn,
+          amountOutMinimum,
+          [tokenIn.address, tokenOut.address],
+          address,
+          deadline,
+        ],
       } as any);
-      addTransaction(`Swap ${amountIn} ${tokenIn.symbol} → ${tokenOut.symbol}`, swapHash);
+      addTransaction(`Swap ${amountIn} ${tokenIn.symbol} → ${tokenOut.symbol} (V2 router)`, swapHash);
       await publicClient.waitForTransactionReceipt({ hash: swapHash });
 
       toast.success(

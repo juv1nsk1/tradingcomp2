@@ -28,6 +28,11 @@ export const TOKENS = {
 export const CONTRACTS = {
   /** Uniswap V2 pair for fETH / FT564 */
   PAIR_V2: envAddress(import.meta.env.VITE_PAIR_V2_ADDRESS, 'VITE_PAIR_V2_ADDRESS'),
+  /**
+   * Uniswap V2 Router02 — same network as the pair; must use the factory that created `PAIR_V2`
+   * (on Sepolia, official router: `0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3`).
+   */
+  ROUTER_V2: envAddress(import.meta.env.VITE_UNISWAP_V2_ROUTER_ADDRESS, 'VITE_UNISWAP_V2_ROUTER_ADDRESS'),
 };
 
 export const ERC20_ABI = parseAbi([
@@ -45,4 +50,9 @@ export const PAIR_V2_ABI = parseAbi([
   'function token1() view returns (address)',
   'function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)',
   'function swap(uint amount0Out, uint amount1Out, address to, bytes data)',
+]);
+
+/** Uniswap V2 Router02 — single-tx swap via transferFrom + pair swap. */
+export const ROUTER_V2_ABI = parseAbi([
+  'function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] path, address to, uint256 deadline) returns (uint256[] amounts)',
 ]);
