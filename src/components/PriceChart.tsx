@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createChart, ColorType, IChartApi, LineSeries, type Time } from 'lightweight-charts';
 import type { PoolPriceSnapshot } from '../types/poolPrice';
 import { formatUnixSeconds } from '../utils/chartTimezone';
+import { useTheme } from '../hooks/useTheme';
+import { getChartColors } from '../utils/chartColors';
 
 type Timeframe = '1H' | '24H' | '1W';
 
@@ -37,12 +39,14 @@ export function PriceChart({ snapshots, loading, error }: PriceChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const [timeframe, setTimeframe] = useState<Timeframe>('24H');
+  const { isDark } = useTheme();
 
   const filtered = useMemo(() => filterSnapshots(snapshots, timeframe), [snapshots, timeframe]);
   const lineData = useMemo(() => toChartPoints(filtered), [filtered]);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
+    const colors = getChartColors();
 
     const handleResize = () => {
       if (chartContainerRef.current && chartRef.current) {
@@ -52,12 +56,12 @@ export function PriceChart({ snapshots, loading, error }: PriceChartProps) {
 
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: 'transparent' },
-        textColor: '#6b7280',
+        background: { type: ColorType.Solid, color: colors.bg },
+        textColor: colors.text,
       },
       grid: {
-        vertLines: { color: '#f3f4f6' },
-        horzLines: { color: '#f3f4f6' },
+        vertLines: { color: colors.grid },
+        horzLines: { color: colors.grid },
       },
       width: chartContainerRef.current.clientWidth,
       height: 300,
@@ -79,12 +83,12 @@ export function PriceChart({ snapshots, loading, error }: PriceChartProps) {
     });
 
     const lineSeries = chart.addSeries(LineSeries, {
-      color: '#4f46e5',
+      color: colors.line,
       lineWidth: 2,
       crosshairMarkerVisible: true,
       crosshairMarkerRadius: 4,
-      crosshairMarkerBorderColor: '#ffffff',
-      crosshairMarkerBackgroundColor: '#4f46e5',
+      crosshairMarkerBorderColor: colors.crosshairBorder,
+      crosshairMarkerBackgroundColor: colors.line,
       priceFormat: {
         type: 'price',
         precision: 3,
@@ -103,7 +107,7 @@ export function PriceChart({ snapshots, loading, error }: PriceChartProps) {
       chart.remove();
       chartRef.current = null;
     };
-  }, [timeframe, lineData]);
+  }, [timeframe, lineData, isDark]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -115,8 +119,8 @@ export function PriceChart({ snapshots, loading, error }: PriceChartProps) {
             onClick={() => setTimeframe(tf)}
             className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
               timeframe === tf
-                ? 'bg-indigo-100 text-indigo-700'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
             {tf}
@@ -124,17 +128,17 @@ export function PriceChart({ snapshots, loading, error }: PriceChartProps) {
         ))}
       </div>
       {loading && (
-        <p className="text-sm text-gray-500 mb-2">Loading pool price history…</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Loading pool price history…</p>
       )}
       {error && (
-        <p className="text-sm text-amber-700 mb-2">{error}</p>
+        <p className="text-sm text-amber-700 dark:text-amber-400 mb-2">{error}</p>
       )}
       {!loading && !error && lineData.length === 0 && (
-        <p className="text-sm text-gray-500 mb-2">
-          No price data in this range. Data is loaded via <code className="text-xs bg-gray-100 px-1 rounded">poolPrice</code>{' '}
-         Try another timeframe or set{' '}
-          <code className="text-xs bg-gray-100 px-1 rounded">VITE_POOL_PRICE_URL=/pool-price.json</code> and run{' '}
-          <code className="text-xs bg-gray-100 px-1 rounded">npm run fetch-pool-price</code>.
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+          No price data in this range. Data is loaded via{' '}
+          <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">poolPrice</code> Try another timeframe or set{' '}
+          <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">VITE_POOL_PRICE_URL=/pool-price.json</code> and run{' '}
+          <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">npm run fetch-pool-price</code>.
         </p>
       )}
       <div ref={chartContainerRef} className="flex-1 w-full min-h-[300px]" />

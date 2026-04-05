@@ -75,36 +75,36 @@ export function MarketContext() {
   return (
     <div className="flex flex-col h-full gap-6">
       {/* Balances Panel */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm p-4 sm:p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Wallet size={20} className="text-indigo-600" />
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <Wallet size={20} className="text-indigo-600 dark:text-indigo-400" />
             Your Balances
           </h2>
           <button
             onClick={() => refetch()}
             disabled={isFetching || !isConnected}
-            className="text-gray-400 hover:text-indigo-600 transition-colors disabled:opacity-50"
+            className="text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-50"
           >
             <RefreshCw size={18} className={isFetching ? 'animate-spin' : ''} />
           </button>
         </div>
 
         {!isConnected ? (
-          <div className="text-center py-6 text-gray-500 text-sm bg-gray-50 rounded-xl border border-dashed border-gray-200">
+          <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm bg-gray-50 dark:bg-gray-950/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
             Connect your wallet to view balances
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">fETH Balance</p>
-              <p className="text-2xl font-bold text-gray-900 font-mono">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="bg-gray-50 dark:bg-gray-800/50 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 min-w-0">
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider mb-1">fETH Balance</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 font-mono truncate">
                 {formatCompactBalance(fEthBalance)}
               </p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">fs564 Balance</p>
-              <p className="text-2xl font-bold text-gray-900 font-mono">
+            <div className="bg-gray-50 dark:bg-gray-800/50 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 min-w-0">
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider mb-1">fs564 Balance</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 font-mono truncate">
                 {formatCompactBalance(ft564Balance)}
               </p>
             </div>
@@ -112,28 +112,28 @@ export function MarketContext() {
         )}
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex-1 flex flex-col">
-        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <TrendingUp size={20} className="text-indigo-600" />
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-800 flex flex-wrap justify-between items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <TrendingUp size={20} className="text-indigo-600 dark:text-indigo-400" />
             Market Context
           </h2>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
               fETH / fs564
             </span>
             <button
               type="button"
               onClick={() => loadPoolPrices()}
               disabled={poolPriceLoading}
-              className="text-gray-400 hover:text-indigo-600 transition-colors disabled:opacity-50 p-1"
+              className="text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-50 p-1"
               title="Reload pool price"
             >
               <RefreshCw size={18} className={poolPriceLoading ? 'animate-spin' : ''} />
             </button>
           </div>
         </div>
-        <div className="flex-1 min-h-[300px] p-4">
+        <div className="flex-1 min-h-[280px] sm:min-h-[300px] p-3 sm:p-4 min-w-0">
           <PriceChart
             snapshots={poolSnapshots}
             loading={poolPriceLoading}

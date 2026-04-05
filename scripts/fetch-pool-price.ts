@@ -2,6 +2,7 @@
  * Reads Uniswap V2 pair reserves and appends a spot price snapshot to a JSON file.
  *
  * Price = fETH per 1 FT564 (fs564) — mid price from reserves, no fee adjustment.
+ * (Reciprocal of “fs564 per 1 fETH”; e.g. if 1 fETH buys ~48.44 fs564, price ≈ 1/48.44 ≈ 0.0206.)
  *
  * Output: JSON array of `{ timestamp, price, pair }` (appended each run).
  *
@@ -128,7 +129,7 @@ async function main() {
     'https://ethereum-sepolia-rpc.publicnode.com';
 
   const outPath =
-    process.env.POOL_PRICE_JSON?.trim() || path.join(ROOT, 'public', 'pool-price.json');
+    process.env.POOL_PRICE_JSON?.trim() || path.join( '/srv/fact/site/data/trade', 'pool-price.json');
 
   const publicClient = createPublicClient({
     chain: sepolia,

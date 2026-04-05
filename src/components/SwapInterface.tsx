@@ -170,7 +170,7 @@ export function SwapInterface() {
     toast.loading(
       <span>
         Approval submitted.{' '}
-        <a href={`https://sepolia.etherscan.io/tx/${approveHash}`} target="_blank" rel="noreferrer" className="underline text-indigo-600">
+        <a href={`https://sepolia.etherscan.io/tx/${approveHash}`} target="_blank" rel="noreferrer" className="underline text-indigo-600 dark:text-indigo-400">
           Sepolia Etherscan
         </a>
       </span>,
@@ -248,7 +248,7 @@ export function SwapInterface() {
       toast.success(
         <span>
           Swap Confirmed.{' '}
-          <a href={`https://sepolia.etherscan.io/tx/${swapHash}`} target="_blank" rel="noreferrer" className="underline text-indigo-600">
+          <a href={`https://sepolia.etherscan.io/tx/${swapHash}`} target="_blank" rel="noreferrer" className="underline text-indigo-600 dark:text-indigo-400">
             Sepolia Etherscan
           </a>
         </span>,
@@ -291,69 +291,71 @@ export function SwapInterface() {
   const buttonState = getButtonState();
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-200 shadow-xl p-6 max-w-md w-full mx-auto relative overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl p-4 sm:p-6 max-w-md w-full mx-auto relative overflow-hidden">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Swap</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Swap</h2>
         <button
           onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500 dark:text-gray-400"
         >
           <Settings size={20} />
         </button>
       </div>
 
       {isSettingsOpen && (
-        <div className="absolute top-16 right-6 bg-white border border-gray-200 shadow-lg rounded-xl p-4 z-10 w-64">
-          <p className="text-sm font-medium text-gray-700 mb-3">Slippage Tolerance</p>
+        <div className="absolute top-16 right-4 sm:right-6 left-4 sm:left-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg rounded-xl p-4 z-10 w-auto sm:w-64">
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Slippage Tolerance</p>
           <div className="flex gap-2 mb-2">
             {[0.1, 0.5, 1].map((val) => (
               <button
                 key={val}
                 onClick={() => setSlippage(val)}
                 className={`flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                  slippage === val ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  slippage === val
+                    ? 'bg-indigo-600 dark:bg-indigo-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
                 {val}%
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">
+          <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5">
             <input
               type="number"
               value={slippage}
               onChange={(e) => setSlippage(Number(e.target.value))}
-              className="w-full bg-transparent text-sm font-medium text-gray-900 outline-none text-right"
+              className="w-full bg-transparent text-sm font-medium text-gray-900 dark:text-gray-100 outline-none text-right"
               placeholder="Custom"
             />
-            <span className="text-sm font-medium text-gray-500">%</span>
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">%</span>
           </div>
         </div>
       )}
 
-      <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 mb-2 hover:border-indigo-200 transition-colors">
-        <div className="flex justify-between mb-2">
-          <span className="text-sm text-gray-500 font-medium">You pay</span>
-          <span className="text-sm text-gray-500 font-medium">
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-3 sm:p-4 border border-gray-100 dark:border-gray-700 mb-2 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors">
+        <div className="flex justify-between mb-2 gap-2 flex-wrap">
+          <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">You pay</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 font-medium truncate text-right">
             Balance: {formatCompactBalance(balanceIn as bigint | undefined, tokenIn.decimals)}
           </span>
         </div>
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
           <input
             type="number"
             value={amountIn}
             onChange={(e) => setAmountIn(e.target.value)}
             placeholder="0"
-            className="bg-transparent text-4xl font-semibold text-gray-900 outline-none w-full placeholder-gray-300"
+            className="bg-transparent text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-gray-100 outline-none w-full min-w-0 placeholder-gray-300 dark:placeholder-gray-600"
           />
-          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm shrink-0">
-            <span className="font-bold text-gray-900">{tokenIn.symbol}</span>
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm shrink-0">
+            <span className="font-bold text-gray-900 dark:text-gray-100">{tokenIn.symbol}</span>
           </div>
         </div>
         <div className="mt-3">
           <button
             onClick={handleMax}
-            className="text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-md transition-colors uppercase tracking-wider"
+            className="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 px-2 py-1 rounded-md transition-colors uppercase tracking-wider"
           >
             Max
           </button>
@@ -367,46 +369,46 @@ export function SwapInterface() {
             setAmountIn('');
             setAmountOut('');
           }}
-          className="bg-white border-4 border-white p-2 rounded-xl text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors shadow-sm"
+          className="bg-white dark:bg-gray-900 border-4 border-white dark:border-gray-900 p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-colors shadow-sm"
         >
           <ArrowDownUp size={20} />
         </button>
       </div>
 
-      <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-2 hover:border-indigo-200 transition-colors">
-        <div className="flex justify-between mb-2">
-          <span className="text-sm text-gray-500 font-medium">You receive</span>
-          <span className="text-sm text-gray-500 font-medium">
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-3 sm:p-4 border border-gray-100 dark:border-gray-700 mt-2 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors">
+        <div className="flex justify-between mb-2 gap-2 flex-wrap">
+          <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">You receive</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 font-medium truncate text-right">
             Balance: {formatCompactBalance(balanceOut as bigint | undefined, tokenOut.decimals)}
           </span>
         </div>
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
           <input
             type="text"
             value={isQuoting ? 'Fetching...' : amountOut}
             readOnly
             placeholder="0"
-            className="bg-transparent text-4xl font-semibold text-gray-900 outline-none w-full placeholder-gray-300"
+            className="bg-transparent text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-gray-100 outline-none w-full min-w-0 placeholder-gray-300 dark:placeholder-gray-600"
           />
-          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm shrink-0">
-            <span className="font-bold text-gray-900">{tokenOut.symbol}</span>
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm shrink-0">
+            <span className="font-bold text-gray-900 dark:text-gray-100">{tokenOut.symbol}</span>
           </div>
         </div>
       </div>
 
       {amountIn && amountOut && !isQuoting && (
-        <div className="mt-4 px-2 py-3 bg-gray-50 rounded-xl border border-gray-100 flex flex-col gap-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500 flex items-center gap-1">
+        <div className="mt-4 px-2 py-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col gap-2">
+          <div className="flex justify-between text-sm gap-2">
+            <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1 shrink-0">
               Rate <Info size={14} />
             </span>
-            <span className="font-medium text-gray-900">
+            <span className="font-medium text-gray-900 dark:text-gray-100 text-right break-all">
               1 {tokenIn.symbol} = {(Number(amountOut) / Number(amountIn)).toFixed(6)} {tokenOut.symbol}
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Slippage Tolerance</span>
-            <span className="font-medium text-gray-900">{slippage}%</span>
+            <span className="text-gray-500 dark:text-gray-400">Slippage Tolerance</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">{slippage}%</span>
           </div>
         </div>
       )}
@@ -414,12 +416,12 @@ export function SwapInterface() {
       <button
         onClick={buttonState.action}
         disabled={buttonState.disabled}
-        className={`w-full mt-6 py-4 rounded-2xl font-bold text-lg transition-all shadow-sm ${
+        className={`w-full mt-6 py-4 rounded-2xl font-bold text-base sm:text-lg transition-all shadow-sm ${
           buttonState.disabled
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
             : needsApproval
-              ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20'
-              : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20'
+              ? 'bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500 text-white shadow-amber-500/20'
+              : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white shadow-indigo-600/20'
         }`}
       >
         {buttonState.text}

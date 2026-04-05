@@ -16,6 +16,8 @@ interface ImportMetaEnv {
   readonly VITE_LEADERBOARD_STANDINGS_URL?: string;
   /** Override rank evolution JSON URL. */
   readonly VITE_LEADERBOARD_RANK_URL?: string;
+  /** Rank-evolution chart: hide wallets still at this fs564 balance (default 5000 → displayed as 5,000.000). */
+  readonly VITE_RANK_EVOLUTION_BASELINE?: string;
 }
 
 interface ImportMeta {

@@ -12,7 +12,9 @@
  *   VITE_TOKEN_FT564_ADDRESS — required (ERC-20 contract)
  *   HOLDERS_CSV — optional input path, default data/holders.csv
  *   HOLDERS_BALANCE_CSV — optional output path, default data/holder-balances.csv
- *   HOLDERS_EVOLUTION_CSV — optional append-only CSV (data/) for chart: timestamp, wallet, balance (top 5)
+ *   HOLDERS_EVOLUTION_CSV — optional append-only CSV (data/) for chart: timestamp, wallet, balance (non‑baseline holders, max 15)
+ *   HOLDERS_EVOLUTION_BASELINE — optional fs564 human balance treated as “starting” / inactive (default 5000 → 5,000.000)
+ *   HOLDERS_EVOLUTION_MAX_ACTIVE — optional cap on holders per snapshot (default 15)
  *   HOLDERS_PUBLIC_STANDINGS_JSON — optional, default public/leaderboard-standings.json (Competition Standings)
  *   HOLDERS_PUBLIC_EVOLUTION_JSON — optional, default public/rank-evolution.json (append snapshots for chart)
  *   HOLDERS_ENS_CSV — optional, default data/holder-ens.csv (address, ens); merged into standings & rank-evolution JSON
@@ -42,8 +44,49 @@ const SEPOLIA_CHAIN_ID = 11155111;
 const FT564_DECIMALS = 18;
 /** Etherscan free tier: Max 3 calls/sec → need >333ms between request *starts*; 450ms + prior request RTT stays under limit */
 const DEFAULT_REQUEST_DELAY_MS = 450;
-/** Lines appended per run to evolution CSV (by FT564 balance, descending) */
-const EVOLUTION_TOP_N = 5;
+/** Default starting fs564 (matches UI “5,000.000”); holders at this value are omitted from rank-evolution snapshots. */
+const DEFAULT_EVOLUTION_BASELINE = 5000;
+/** Max holders written per evolution snapshot (after filtering out baseline balance). */
+const DEFAULT_EVOLUTION_MAX_ACTIVE = 15;
+
+function parseEvolutionBaseline(): number {
+  const raw =
+    process.env.HOLDERS_EVOLUTION_BASELINE?.trim() ||
+    process.env.VITE_RANK_EVOLUTION_BASELINE?.trim();
+  if (raw) {
+    const n = Number.parseFloat(raw);
+    if (Number.isFinite(n)) return n;
+  }
+  return DEFAULT_EVOLUTION_BASELINE;
+}
+
+function parseEvolutionMaxActive(): number {
+  const raw = process.env.HOLDERS_EVOLUTION_MAX_ACTIVE?.trim();
+  if (raw) {
+    const n = Number.parseInt(raw, 10);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return DEFAULT_EVOLUTION_MAX_ACTIVE;
+}
+
+/** True if balance equals the starting allocation (within float tolerance). */
+function isStartingBalanceHuman(balanceHuman: string, baseline: number): boolean {
+  const n = Number.parseFloat(balanceHuman);
+  if (!Number.isFinite(n)) return false;
+  return Math.abs(n - baseline) < 1e-7;
+}
+
+/**
+ * `sorted` = all holders by FT564 descending. Keep those not at baseline, then take up to `maxN`.
+ */
+function selectEvolutionHolders(
+  sorted: HolderSnapshot[],
+  baseline: number,
+  maxN: number,
+): HolderSnapshot[] {
+  const active = sorted.filter((h) => !isStartingBalanceHuman(h.balanceHuman, baseline));
+  return active.slice(0, Math.min(maxN, active.length));
+}
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -363,11 +406,13 @@ async function main() {
   const sorted = [...snapshots].sort((a, b) =>
     a.balanceWei === b.balanceWei ? 0 : a.balanceWei < b.balanceWei ? 1 : -1,
   );
-  const top = sorted.slice(0, Math.min(EVOLUTION_TOP_N, sorted.length));
+  const evolutionBaseline = parseEvolutionBaseline();
+  const evolutionMaxActive = parseEvolutionMaxActive();
+  const top = selectEvolutionHolders(sorted, evolutionBaseline, evolutionMaxActive);
   const timestampIso = new Date().toISOString();
   appendEvolutionTopCsv(evolutionPath, timestampIso, top);
   console.log(
-    `\nAppended top ${top.length} balance row(s) for evolution chart → ${evolutionPath}`,
+    `\nAppended ${top.length} evolution row(s) (balance ≠ ${evolutionBaseline}, max ${evolutionMaxActive}) → ${evolutionPath}`,
   );
 
   const standingsRows: LeaderboardStandingsRow[] = sorted.map((h, idx) => {
@@ -400,7 +445,9 @@ async function main() {
     })),
   };
   appendRankEvolutionJson(publicEvolutionPath, evolutionSnapshot);
-  console.log(`Appended rank evolution snapshot → ${publicEvolutionPath}`);
+  console.log(
+    `Appended rank evolution snapshot (${top.length} holder(s)) → ${publicEvolutionPath}`,
+  );
 
   console.log(`\nWrote ${wallets.length} row(s) to ${outPath}`);
 }
